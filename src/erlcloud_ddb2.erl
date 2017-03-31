@@ -635,6 +635,8 @@ undynamize_value({<<"BS">>, Values}, _) ->
     [base64:decode(Value) || Value <- Values];
 undynamize_value({<<"L">>, List}, Opts) ->
     [undynamize_value(Value, Opts) || [Value] <- List];
+undynamize_value({<<"M">>, [{}]}, _Opts) ->
+    [];
 undynamize_value({<<"M">>, Map}, Opts) ->
     [undynamize_attr(Attr, Opts) || Attr <- Map].
 
