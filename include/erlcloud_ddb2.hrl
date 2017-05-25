@@ -1,14 +1,14 @@
 -record(ddb2_error,
-        {attempt :: pos_integer(),
-         error_type :: ddb | http | httpc,
-         should_retry :: boolean(),
-         reason :: term(),
-         request_headers :: [{string(), string()}],
-         request_body :: jsx:json_text(),
-         response_status :: pos_integer(),
-         response_status_line :: string(),
-         response_headers :: [{string(), string()}],
-         response_body :: binary()
+        {attempt :: undefined | pos_integer(),
+         error_type :: undefined | ddb | http | httpc,
+         should_retry :: undefined | boolean(),
+         reason :: undefined | term(),
+         request_headers :: undefined | [{string(), string()}],
+         request_body :: undefined | jsx:json_text(),
+         response_status :: undefined | pos_integer(),
+         response_status_line :: undefined | string(),
+         response_headers :: undefined | [{string(), string()}],
+         response_body :: undefined | binary()
         }).
 
 -type date_time() :: number().
