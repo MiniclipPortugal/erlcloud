@@ -337,6 +337,16 @@ decode_msg_attribute_name("ApproximateReceiveCount") -> approximate_receive_coun
 decode_msg_attribute_name("ApproximateFirstReceiveTimestamp") -> approximate_first_receive_timestamp;
 decode_msg_attribute_name(Name) when is_list(Name) -> Name.
 
+decode_msg_attribute_value("SenderId", Value) -> Value;
+decode_msg_attribute_value("MessageGroupId", Value) -> Value;
+decode_msg_attribute_value("MessageDeduplicationId", Value) -> Value;
+decode_msg_attribute_value(_Name, Value) ->
+    try list_to_integer(Value)
+    catch
+        _:_ ->
+            Value
+    end.
+
 decode_messages(Messages) ->
     [decode_message(Message) || Message <- Messages].
 
@@ -392,8 +402,7 @@ decode_message_attribute_value(DataType, Value) ->
 
 decode_msg_attributes(Attrs)  ->
     [{decode_msg_attribute_name(Name),
-      case Name of "SenderId" -> Value; _ -> list_to_integer(Value) end} ||
-        {Name, Value} <- decode_attributes(Attrs)].
+      decode_msg_attribute_value(Name, Value)} || {Name, Value} <- decode_attributes(Attrs)].
 
 decode_attributes(Attrs) ->
     [{erlcloud_xml:get_text("Name", Attr), erlcloud_xml:get_text("Value", Attr)} ||
@@ -426,9 +435,9 @@ send_message(QueueName, MessageBody, DelaySeconds, Config) ->
 
 -spec send_message(string(), string(), 0..900 | none, [message_attribute()], aws_config()) -> proplist() | no_return().
 send_message(QueueName, MessageBody, DelaySeconds, MessageAttributes, #aws_config{}=Config)
-  when is_list(QueueName) andalso 
+  when is_list(QueueName) andalso
        is_list(MessageBody) andalso
-       ((DelaySeconds >= 0 andalso DelaySeconds =< 900) orelse DelaySeconds =:= none) andalso 
+       ((DelaySeconds >= 0 andalso DelaySeconds =< 900) orelse DelaySeconds =:= none) andalso
        is_list(MessageAttributes) ->
     EncodedMessageAttributes = encode_message_attributes(MessageAttributes),
     Doc = sqs_xml_request(Config, QueueName, "SendMessage",
