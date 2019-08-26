@@ -217,7 +217,12 @@ decode_attribute_name("RedrivePolicy") -> redrive_policy.
 decode_attribute_value("Policy", Value) -> Value;
 decode_attribute_value("QueueArn", Value) -> Value;
 decode_attribute_value("RedrivePolicy", Value) -> Value;
-decode_attribute_value(_, Value) -> list_to_integer(Value).
+decode_attribute_value(_, Value) ->
+    try list_to_integer(Value)
+    catch
+        _:_ ->
+            Value
+    end.
 
 
 -spec list_queues() -> [string()] | no_return().
@@ -426,9 +431,9 @@ send_message(QueueName, MessageBody, DelaySeconds, Config) ->
 
 -spec send_message(string(), string(), 0..900 | none, [message_attribute()], aws_config()) -> proplist() | no_return().
 send_message(QueueName, MessageBody, DelaySeconds, MessageAttributes, #aws_config{}=Config)
-  when is_list(QueueName) andalso 
+  when is_list(QueueName) andalso
        is_list(MessageBody) andalso
-       ((DelaySeconds >= 0 andalso DelaySeconds =< 900) orelse DelaySeconds =:= none) andalso 
+       ((DelaySeconds >= 0 andalso DelaySeconds =< 900) orelse DelaySeconds =:= none) andalso
        is_list(MessageAttributes) ->
     EncodedMessageAttributes = encode_message_attributes(MessageAttributes),
     Doc = sqs_xml_request(Config, QueueName, "SendMessage",
